@@ -13,16 +13,19 @@ public class RenderCeldasTabla extends JPanel implements TableCellRenderer {
         setOpaque(true);
 
         labelNumero = new JLabel("0", SwingConstants.CENTER);
-        labelNumero.setPreferredSize(new Dimension(40, 25));
+        labelNumero.setPreferredSize(new Dimension(30, 15));
         labelNumero.setFont(new Font("SansSerif", Font.BOLD, 14));
         labelNumero.setHorizontalAlignment(SwingConstants.CENTER);
 
         btnMas = new RoundedButton("+", 10);
         btnMenos = new RoundedButton("-", 10);
 
-        Dimension btnSize = new Dimension(10, 10);  // Unificado con editor
-        btnMas.setPreferredSize(btnSize);
-        btnMenos.setPreferredSize(btnSize);
+        btnMas.setPreferredSize(new Dimension(22, 22));
+        btnMas.setMargin(new Insets(0, 0, 0, 0));
+
+        btnMenos.setPreferredSize(new Dimension(22, 22));
+        btnMenos.setMargin(new Insets(0, 0, 0, 0));
+
 
         Color btnColor = new Color(255, 153, 0);
         btnMas.setBackground(btnColor);

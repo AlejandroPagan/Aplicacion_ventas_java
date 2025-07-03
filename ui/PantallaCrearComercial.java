@@ -10,8 +10,6 @@ import database.ConexionBD;
 import model.Comercial;
 import database.ComercialesDAO;
 /*
- * 1.Al tocar el botón crear no pasa nada
- * 2.No sé si se añade el comercial
  * */
 public class PantallaCrearComercial extends JFrame{
 	private JTextField campoNombre;
@@ -19,8 +17,11 @@ public class PantallaCrearComercial extends JFrame{
 	private JCheckBox checkEspecial;
 	private RoundedButton botonGuardar;
 	private JFrame desplegable;
+	private MainFrame mainFrame;
 	
-	public PantallaCrearComercial() {
+	public PantallaCrearComercial(MainFrame mainFrame) {
+		this.mainFrame = mainFrame;
+		
 		setTitle("Crear comercial");
 		setSize(200,250);
 		setLocationRelativeTo(null);
@@ -92,6 +93,7 @@ public class PantallaCrearComercial extends JFrame{
 					setVisible(false);
 					JOptionPane.showMessageDialog(null, "Comercial insertado correctamente", "Advertencia",
 							JOptionPane.INFORMATION_MESSAGE);
+					mainFrame.actualizarTablaComerciales();
 				} else {
 					JOptionPane.showMessageDialog(null, "Error al insertar el comercial", "Advertencia",
 							JOptionPane.WARNING_MESSAGE);

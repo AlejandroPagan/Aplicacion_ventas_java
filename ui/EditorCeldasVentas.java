@@ -4,20 +4,35 @@ import java.awt.*;
 import javax.swing.*;
 import javax.swing.table.TableCellEditor;
 
+import org.jfree.chart.JFreeChart;
+
+import database.VentasDAO;
+import model.Venta;
+
 public class EditorCeldasVentas extends AbstractCellEditor implements TableCellEditor {
     private final JPanel panel;
     private final JLabel labelNumero;
     private final RoundedButton btnMas, btnMenos;
-    private int valor;
+    private int valor, intFila, intColumn;
+    private JTable tabla;
+    private JFreeChart chart;
+    private MainFrame mainFrame;
+    
+    private final String[] meses = {
+            "enero", "febrero", "marzo", "abril", "mayo", "junio",
+            "julio", "agosto", "septiembre", "octubre", "noviembre", "diciembre"
+        };
 
-    public EditorCeldasVentas(JTable tabla) {
+    public EditorCeldasVentas(JTable tabla, MainFrame mainFrame) {
+    	this.tabla = tabla;
+    	this.mainFrame=mainFrame;
         panel = new JPanel();
         panel.setLayout(new BoxLayout(panel, BoxLayout.X_AXIS));
         panel.setOpaque(true);
-        panel.setBackground(new Color(30, 30, 30));  // Fondo oscuro
+        panel.setBackground(new Color(30, 30, 30));
 
         labelNumero = new JLabel("0", SwingConstants.CENTER);
-        labelNumero.setPreferredSize(new Dimension(40, 25));
+        labelNumero.setPreferredSize(new Dimension(30, 15));
         labelNumero.setFont(new Font("SansSerif", Font.BOLD, 14));
         labelNumero.setForeground(Color.WHITE);
         labelNumero.setHorizontalAlignment(SwingConstants.CENTER);
@@ -25,10 +40,11 @@ public class EditorCeldasVentas extends AbstractCellEditor implements TableCellE
         btnMas = new RoundedButton("+", 10);
         btnMenos = new RoundedButton("-", 10);
 
-        Dimension btnSize = new Dimension(10, 10);
-        btnMas.setPreferredSize(btnSize);
-        btnMenos.setPreferredSize(btnSize);
-        
+        btnMas.setPreferredSize(new Dimension(22, 22));
+        btnMas.setMargin(new Insets(0, 0, 0, 0));
+
+        btnMenos.setPreferredSize(new Dimension(22, 22));
+        btnMenos.setMargin(new Insets(0, 0, 0, 0));        
 
         // Estilo visual de los botones
         Color btnColor = new Color(255, 153, 0);
@@ -43,12 +59,12 @@ public class EditorCeldasVentas extends AbstractCellEditor implements TableCellE
         
         btnMas.addActionListener(e -> {
             valor++;
-            labelNumero.setText(String.valueOf(valor));
+            labelNumero.setText(String.valueOf(valor));      
         });
 
         btnMenos.addActionListener(e -> {
             if (valor > 0) valor--;
-            labelNumero.setText(String.valueOf(valor));
+            labelNumero.setText(String.valueOf(valor)); 
         });
 
         panel.add(Box.createHorizontalStrut(3));
@@ -62,13 +78,64 @@ public class EditorCeldasVentas extends AbstractCellEditor implements TableCellE
 
     @Override
     public Object getCellEditorValue() {
+    	try {
+    		 if (intFila < 0 || intFila >= tabla.getRowCount() || intColumn < 0 || intColumn >= tabla.getColumnCount()) {
+    	            return valor;
+    	        }
+    		int idComercial = Integer.parseInt(tabla.getValueAt(intFila, 0).toString());
+    		if (intColumn >= 2 && intColumn < 14) {
+    	        String mes = meses[intColumn - 2];
+    		
+    	        VentasDAO comercial = new VentasDAO();
+    			Venta venta = new Venta(idComercial, mes, valor);
+    		 		   		   		
+    			if(comercial.actualizarVentas(venta)) {
+    				mostrarTooltip("Ventas actualizadas", intFila, intColumn);
+    				mainFrame.actualizarTablaComerciales();
+    				mainFrame.actualizarGrafica();
+    				}
+    		}
+    	}catch(Exception e) {
+    		e.printStackTrace();
+    	}  	
         return valor;
     }
 
     @Override
     public Component getTableCellEditorComponent(JTable table, Object value, boolean isSelected, int row, int column) {
-        valor = (value != null) ? Integer.parseInt(value.toString()) : 0;
+       this.intFila = row;
+       this.intColumn = column;   	
+    	
+    	valor = (value != null) ? Integer.parseInt(value.toString()) : 0;
         labelNumero.setText(String.valueOf(valor));
         return panel;
     }
+    private void mostrarTooltip(String mensaje, int fila, int columna) {
+        Rectangle rect = tabla.getCellRect(fila, columna, true);
+        Point punto = rect.getLocation();
+        SwingUtilities.convertPointToScreen(punto, tabla);
+        
+        JWindow tooltipWindow = new JWindow();
+        tooltipWindow.setLayout(new BorderLayout());
+        
+        JLabel label = new JLabel(mensaje);
+        label.setOpaque(true);
+        label.setBackground(new Color(60, 60, 60));
+        label.setForeground(Color.WHITE);
+        label.setBorder(BorderFactory.createLineBorder(Color.ORANGE));
+        label.setFont(new Font("SansSerif", Font.PLAIN, 12));
+        label.setHorizontalAlignment(SwingConstants.CENTER);
+        label.setPreferredSize(new Dimension(140, 25));
+
+        tooltipWindow.add(label);
+        tooltipWindow.pack();
+        
+        // Posición del tooltip justo arriba de la celda
+        tooltipWindow.setLocation(punto.x + 20, punto.y - 30);
+        tooltipWindow.setVisible(true);
+        
+        // Ocultarlo tras 2 segundos
+        new Timer(2000, e -> tooltipWindow.setVisible(false)).start();
+    }
+
 }
