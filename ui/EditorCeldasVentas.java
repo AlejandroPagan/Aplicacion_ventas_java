@@ -78,29 +78,40 @@ public class EditorCeldasVentas extends AbstractCellEditor implements TableCellE
 
     @Override
     public Object getCellEditorValue() {
-    	try {
-    		 if (intFila < 0 || intFila >= tabla.getRowCount() || intColumn < 0 || intColumn >= tabla.getColumnCount()) {
-    	            return valor;
-    	        }
-    		int idComercial = Integer.parseInt(tabla.getValueAt(intFila, 0).toString());
-    		if (intColumn >= 2 && intColumn < 14) {
-    	        String mes = meses[intColumn - 2];
-    		
-    	        VentasDAO comercial = new VentasDAO();
-    			Venta venta = new Venta(idComercial, mes, valor);
-    		 		   		   		
-    			if(comercial.actualizarVentas(venta)) {
-    				mostrarTooltip("Ventas actualizadas", intFila, intColumn);
-    				mainFrame.actualizarTablaComerciales();
-    				mainFrame.actualizarGrafica();
-    				}
-    		}
-    	}catch(Exception e) {
-    		e.printStackTrace();
-    	}  	
+        if (intFila < 0 || intFila >= tabla.getRowCount() || intColumn < 0 || intColumn >= tabla.getColumnCount()) {
+            return valor;
+        }
+        int idComercial = Integer.parseInt(tabla.getValueAt(intFila, 0).toString());
+        if (intColumn >= 2 && intColumn < 14) {
+            String mes = meses[intColumn - 2];
+            Venta venta = new Venta(idComercial, mes, valor);
+            
+            // Usar SwingWorker para no bloquear EDT
+            SwingWorker<Boolean, Void> worker = new SwingWorker<>() {
+                @Override
+                protected Boolean doInBackground() throws Exception {
+                    VentasDAO comercial = new VentasDAO();
+                    return comercial.actualizarVentas(venta);
+                }
+
+                @Override
+                protected void done() {
+                    try {
+                        boolean exito = get();
+                        if (exito) {
+                            mainFrame.actualizarTablaComerciales();
+                            mainFrame.actualizarGrafica();
+                            mostrarTooltip("Ventas actualizadas", intFila, intColumn);
+                        }
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                    }
+                }
+            };
+            worker.execute();
+        }
         return valor;
     }
-
     @Override
     public Component getTableCellEditorComponent(JTable table, Object value, boolean isSelected, int row, int column) {
        this.intFila = row;
