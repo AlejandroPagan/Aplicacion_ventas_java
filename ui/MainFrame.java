@@ -2,6 +2,8 @@ package ui;
 
 import javax.swing.*;
 import javax.swing.table.DefaultTableModel;
+import ui.EditorEliminarDeTabla;
+import ui.EditorEliminarDeTabla;
 
 import org.jfree.chart.ChartFactory;
 import org.jfree.chart.ChartPanel;
@@ -14,11 +16,9 @@ import org.jfree.data.category.DefaultCategoryDataset;
 
 import java.awt.*;
 /*Cosas que faltan: 
- * 4.Añadir una forma de eliminar los comerciales
  * 5.Resaltar una columna de comerciales concreta
  * 6.Que al seleccionar un comercial se modifique la gráfica y se muestren sus datos en la gráfica.
- * 7.Forma de mostrar los comerciales especiales o mejor dicho las 
- * */
+ */
 public class MainFrame extends JFrame{
 	private JPanel toolbar;
 	private RoundedButton botonCrear;
@@ -58,30 +58,8 @@ public class MainFrame extends JFrame{
 	}
 	public void iniCuerpo() {           		
         //creo la gráfica con la clase externa
-        CreadorGrafica grafica= new CreadorGrafica();
-        DefaultCategoryDataset dataset= grafica.datasetGrafica();
-        chart = ChartFactory.createBarChart("Ventas por mes", "VENTAS", "MES", dataset, PlotOrientation.VERTICAL, true,true, false);
-
-		chart.setBackgroundPaint(Color.DARK_GRAY);
-	    chart.getTitle().setPaint(Color.WHITE);
-	    
-		 CategoryPlot plot = chart.getCategoryPlot();
-		 plot.setBackgroundPaint(new Color(30,30,30));
-		 plot.setDomainGridlinePaint(Color.white);		    
-		 plot.getDomainAxis().setTickLabelPaint(Color.WHITE);
-		 plot.getRangeAxis().setTickLabelPaint(Color.white);
-		 plot.getDomainAxis().setLabelPaint(Color.white);
-		 plot.getRangeAxis().setLabelPaint(Color.white);	    
-	        
-		 //Aspecto de las barras
-		 BarRenderer renderer = (BarRenderer) plot.getRenderer();
-
-		 renderer.setSeriesPaint(0, new Color(255, 153, 0));
-		 renderer.setDrawBarOutline(false);
-		 renderer.setBaseItemLabelGenerator(new StandardCategoryItemLabelGenerator());
-		 renderer.setBaseItemLabelsVisible(true);
-		 renderer.setBaseItemLabelFont(new Font("SansSerif", Font.PLAIN, 12));
-		 renderer.setBaseItemLabelPaint(Color.WHITE);
+		cajaGrafica = new JPanel();
+		primeraGrafica();
         
         //caja de la grafica
 		chartPanel = new ChartPanel(chart);
@@ -112,23 +90,7 @@ public class MainFrame extends JFrame{
 		// =========Crear Tabla===========//
 		tabla = new JTableConHover();
 
-		CreadorTabla creador = new CreadorTabla();
-		DefaultTableModel modelo = creador.modeloTabla();
-		tabla.setModel(modelo);
-		tabla.setShowGrid(true); // Muestra líneas entre celdas
-		tabla.setGridColor(Color.GRAY);
-		tabla.getTableHeader().setReorderingAllowed(false);
-		tabla.getTableHeader().setBackground(new Color(0, 102, 204));
-		tabla.getTableHeader().setForeground(Color.WHITE);
-		tabla.getTableHeader().setFont(new Font("SansSerif", Font.BOLD, 14));
-		tabla.setRowHeight(30); 
-
-		EditorCeldasVentas editor = new EditorCeldasVentas(tabla, MainFrame.this);
-		RenderCeldasTabla renderCelda = new RenderCeldasTabla();
-		for (int i = 2; i < (tabla.getColumnCount()-1); i++) {
-			tabla.getColumnModel().getColumn(i).setCellEditor(editor);
-			tabla.getColumnModel().getColumn(i).setCellRenderer(renderCelda);		
-			}
+		actualizarTablaComerciales();
 
 		JScrollPane scroll = new JScrollPane(tabla);
 		scroll.setPreferredSize(new Dimension(1000, 400));
@@ -144,6 +106,23 @@ public class MainFrame extends JFrame{
 		JPanel cuerpo = new JPanel(new BorderLayout());
 		cuerpo.add(cajaVertical, BorderLayout.CENTER);
 		add(cuerpo, BorderLayout.CENTER);
+		
+		tabla.addMouseListener(new java.awt.event.MouseAdapter() {
+		    @Override
+		    public void mouseClicked(java.awt.event.MouseEvent e) {
+		        int fila = tabla.rowAtPoint(e.getPoint());
+		        int columna = tabla.columnAtPoint(e.getPoint());
+		        if (fila >= 0) {
+		            if (columna == 1) { // columna del nombre del comercial
+		                String nombreComercial = (String) tabla.getValueAt(fila, columna);
+		                actualizarGraficaPorComercial(nombreComercial);
+		            } else {
+		                actualizarGrafica(); // General si no es la columna nombre
+		            }
+		        }
+		    }
+		});
+
 	}
 	public RoundedButton botonCrear() {
 		botonCrear= new RoundedButton("Añadir Comercial",20);
@@ -178,10 +157,49 @@ public class MainFrame extends JFrame{
 
 		EditorCeldasVentas editor = new EditorCeldasVentas(tabla,MainFrame.this);
 		RenderCeldasTabla renderCelda = new RenderCeldasTabla();
-		for (int i = 2; i < tabla.getColumnCount(); i++) {
+		for (int i = 2; i < (tabla.getColumnCount()-1); i++) {
 			tabla.getColumnModel().getColumn(i).setCellEditor(editor);
-			tabla.getColumnModel().getColumn(i).setCellRenderer(renderCelda);		
-			}			
+			tabla.getColumnModel().getColumn(i).setCellRenderer(renderCelda);			
+			}	
+		// Editor para columna de botones "Eliminar"
+		int colEspecial = tabla.getColumnCount() - 1;
+		tabla.getColumnModel().getColumn(colEspecial).setCellEditor(new EditorEliminarDeTabla(tabla, this));
+		tabla.getColumnModel().getColumn(colEspecial).setCellRenderer(new RenderEliminarTabla());
+
+	}
+	public void primeraGrafica() {
+		CreadorGrafica grafica = new CreadorGrafica();
+	    DefaultCategoryDataset dataset = grafica.datasetGrafica();
+	    chart = ChartFactory.createBarChart("Ventas por mes", "VENTAS", "MES", dataset, PlotOrientation.VERTICAL, true, true, false);
+
+	    chart.setBackgroundPaint(Color.DARK_GRAY);
+	    chart.getTitle().setPaint(Color.WHITE);
+
+	    CategoryPlot plot = chart.getCategoryPlot();
+	    plot.setBackgroundPaint(new Color(30,30,30));
+	    plot.setDomainGridlinePaint(Color.white);		    
+	    plot.getDomainAxis().setTickLabelPaint(Color.WHITE);
+	    plot.getRangeAxis().setTickLabelPaint(Color.white);
+	    plot.getDomainAxis().setLabelPaint(Color.white);
+	    plot.getRangeAxis().setLabelPaint(Color.white);	    
+
+	    BarRenderer renderer = (BarRenderer) plot.getRenderer();
+	    renderer.setSeriesPaint(0, new Color(255, 153, 0));
+	    renderer.setDrawBarOutline(false);
+	    renderer.setBaseItemLabelGenerator(new StandardCategoryItemLabelGenerator());
+	    renderer.setBaseItemLabelsVisible(true);
+	    renderer.setBaseItemLabelFont(new Font("SansSerif", Font.PLAIN, 12));
+	    renderer.setBaseItemLabelPaint(Color.WHITE);
+		
+	 // Crea y añade el nuevo chartPanel
+	    chartPanel = new ChartPanel(chart);
+	    chartPanel.setPreferredSize(new Dimension(800, 350));
+	    chartPanel.setBackground(Color.WHITE);
+	    chartPanel.setBorder(BorderFactory.createLineBorder(Color.GRAY, 1));
+
+	    cajaGrafica.add(chartPanel);
+	    cajaGrafica.revalidate(); // Actualiza el layout
+	    cajaGrafica.repaint();    // Repinta el panel	
 	}
 	public void actualizarGrafica() {
 	    CreadorGrafica grafica = new CreadorGrafica();
@@ -219,6 +237,41 @@ public class MainFrame extends JFrame{
 	    cajaGrafica.add(chartPanel);
 	    cajaGrafica.revalidate(); // Actualiza el layout
 	    cajaGrafica.repaint();    // Repinta el panel
+	}
+	public void actualizarGraficaPorComercial(String nombreComercial) {
+	    CreadorGrafica grafica = new CreadorGrafica();
+	    DefaultCategoryDataset dataset = grafica.datasetGraficaPorComercial(nombreComercial);
+	    chart = ChartFactory.createBarChart("Ventas por mes - " + nombreComercial, "MES", "VENTAS", dataset, PlotOrientation.VERTICAL, true, true, false);
+
+	    chart.setBackgroundPaint(Color.DARK_GRAY);
+	    chart.getTitle().setPaint(Color.WHITE);
+
+	    CategoryPlot plot = chart.getCategoryPlot();
+	    plot.setBackgroundPaint(new Color(30, 30, 30));
+	    plot.setDomainGridlinePaint(Color.white);
+	    plot.getDomainAxis().setTickLabelPaint(Color.WHITE);
+	    plot.getRangeAxis().setTickLabelPaint(Color.white);
+	    plot.getDomainAxis().setLabelPaint(Color.white);
+	    plot.getRangeAxis().setLabelPaint(Color.white);
+
+	    BarRenderer renderer = (BarRenderer) plot.getRenderer();
+	    renderer.setSeriesPaint(0, new Color(255, 153, 0));
+	    renderer.setDrawBarOutline(false);
+	    renderer.setBaseItemLabelGenerator(new StandardCategoryItemLabelGenerator());
+	    renderer.setBaseItemLabelsVisible(true);
+	    renderer.setBaseItemLabelFont(new Font("SansSerif", Font.PLAIN, 12));
+	    renderer.setBaseItemLabelPaint(Color.WHITE);
+
+	    cajaGrafica.remove(chartPanel);
+
+	    chartPanel = new ChartPanel(chart);
+	    chartPanel.setPreferredSize(new Dimension(800, 350));
+	    chartPanel.setBackground(Color.WHITE);
+	    chartPanel.setBorder(BorderFactory.createLineBorder(Color.GRAY, 1));
+
+	    cajaGrafica.add(chartPanel);
+	    cajaGrafica.revalidate();
+	    cajaGrafica.repaint();
 	}
 
 }

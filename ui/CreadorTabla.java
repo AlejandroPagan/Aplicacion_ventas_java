@@ -11,10 +11,19 @@ import javax.swing.table.DefaultTableModel;
 public class CreadorTabla {
 	
 	public DefaultTableModel modeloTabla() {
+		
 		String columnas[]= {"ID", "Nombre", "Enero", "Febrero", "Marzo", "Abril", "Mayo", "Junio",
 	            "Julio", "Agosto", "Septiembre", "Octubre", "Noviembre", "Diciembre", "Especial"
 	        };
-		DefaultTableModel modelo = new DefaultTableModel(columnas,0);
+		DefaultTableModel modelo = new DefaultTableModel(columnas, 0) {
+		    @Override
+		    public boolean isCellEditable(int row, int column) {
+		        // Solo las columnas 0 (ID), 1 (Nombre) y 14 (Especial) son NO editables
+		        return column != 0 && column != 1;
+		    }
+		};
+
+
 		
 		String sql = "SELECT id_comercial, nombre, enero, febrero, marzo, abril, mayo, junio, " +
 	             "julio, agosto, septiembre, octubre, noviembre, diciembre, es_especial FROM ventas_comerciales";

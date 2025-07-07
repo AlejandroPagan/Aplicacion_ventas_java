@@ -33,7 +33,33 @@ public class CreadorGrafica {
 		}
 		return dataset;
 	}
-	
+	public DefaultCategoryDataset datasetGraficaPorComercial(String nombreComercial) {
+	    DefaultCategoryDataset dataset = new DefaultCategoryDataset();
+	    String[] meses = {"Enero", "Febrero", "Marzo", "Abril", "Mayo", "Junio",
+	            "Julio", "Agosto", "Septiembre", "Octubre", "Noviembre", "Diciembre"};
+	    
+	    String statement = "SELECT enero, febrero, marzo, abril, mayo, junio, " +
+	            "julio, agosto, septiembre, octubre, noviembre, diciembre " +
+	            "FROM ventas_comerciales WHERE nombre = ?";
+	    
+	    try (Connection conexion = ConexionBD.getConexion();
+	         PreparedStatement pstm = conexion.prepareStatement(statement)) {
+	        
+	        pstm.setString(1, nombreComercial);
+	        try (ResultSet rs = pstm.executeQuery()) {
+	            if (rs.next()) {
+	                for (int i = 0; i < meses.length; i++) {
+	                    int ventas = rs.getInt(i + 1);
+	                    dataset.addValue(ventas, "ventas", meses[i]);
+	                }
+	            }
+	        }
+	    } catch (SQLException e) {
+	        e.printStackTrace();
+	    }
+	    return dataset;
+	}
+
 	
 	
 }

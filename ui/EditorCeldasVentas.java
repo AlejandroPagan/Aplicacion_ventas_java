@@ -12,10 +12,9 @@ import model.Venta;
 public class EditorCeldasVentas extends AbstractCellEditor implements TableCellEditor {
     private final JPanel panel;
     private final JLabel labelNumero;
-    private final RoundedButton btnMas, btnMenos;
+    private final RoundedButton btnMas, btnMenos, btnElimComercial;
     private int valor, intFila, intColumn;
     private JTable tabla;
-    private JFreeChart chart;
     private MainFrame mainFrame;
     
     private final String[] meses = {
@@ -56,6 +55,8 @@ public class EditorCeldasVentas extends AbstractCellEditor implements TableCellE
         btnMenos.setFocusPainted(false);
         btnMas.setFont(new Font("SansSerif", Font.BOLD, 8));
         btnMenos.setFont(new Font("SansSerif", Font.BOLD, 8));
+        
+        btnElimComercial = new RoundedButton("",10);
         
         btnMas.addActionListener(e -> {
             valor++;
