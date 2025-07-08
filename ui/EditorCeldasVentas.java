@@ -58,14 +58,16 @@ public class EditorCeldasVentas extends AbstractCellEditor implements TableCellE
         
         btnElimComercial = new RoundedButton("",10);
         
-        btnMas.addActionListener(e -> {
+        configurarBotonConRepeticion(btnMas, () -> {
             valor++;
-            labelNumero.setText(String.valueOf(valor));      
+            labelNumero.setText(String.valueOf(valor));
         });
 
-        btnMenos.addActionListener(e -> {
-            if (valor > 0) valor--;
-            labelNumero.setText(String.valueOf(valor)); 
+        configurarBotonConRepeticion(btnMenos, () -> {
+            if (valor > 0) {
+                valor--;
+                labelNumero.setText(String.valueOf(valor));
+            }
         });
 
         panel.add(Box.createHorizontalStrut(3));
@@ -148,6 +150,27 @@ public class EditorCeldasVentas extends AbstractCellEditor implements TableCellE
         
         // Ocultarlo tras 2 segundos
         new Timer(2000, e -> tooltipWindow.setVisible(false)).start();
+    }
+ // Timer y lógica común
+    private void configurarBotonConRepeticion(RoundedButton boton, Runnable accion) {
+        Timer timer = new Timer(100, e -> accion.run());
+        boton.addMouseListener(new java.awt.event.MouseAdapter() {
+            @Override
+            public void mousePressed(java.awt.event.MouseEvent e) {
+                accion.run(); // Ejecutar inmediatamente
+                timer.start();
+            }
+
+            @Override
+            public void mouseReleased(java.awt.event.MouseEvent e) {
+                timer.stop();
+            }
+
+            @Override
+            public void mouseExited(java.awt.event.MouseEvent e) {
+                timer.stop(); // Detener si se sale del botón
+            }
+        });
     }
 
 }

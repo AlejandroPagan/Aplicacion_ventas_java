@@ -18,7 +18,7 @@ public class CreadorTabla {
 		DefaultTableModel modelo = new DefaultTableModel(columnas, 0) {
 		    @Override
 		    public boolean isCellEditable(int row, int column) {
-		        // Solo las columnas 0 (ID), 1 (Nombre) y 14 (Especial) son NO editables
+		        // Solo las columnas 0 (ID), 1 (Nombre) son NO editables
 		        return column != 0 && column != 1;
 		    }
 		};

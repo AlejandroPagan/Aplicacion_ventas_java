@@ -3,8 +3,6 @@ package ui;
 import javax.swing.*;
 import javax.swing.table.DefaultTableModel;
 import ui.EditorEliminarDeTabla;
-import ui.EditorEliminarDeTabla;
-
 import org.jfree.chart.ChartFactory;
 import org.jfree.chart.ChartPanel;
 import org.jfree.chart.JFreeChart;
@@ -16,8 +14,7 @@ import org.jfree.data.category.DefaultCategoryDataset;
 
 import java.awt.*;
 /*Cosas que faltan: 
- * 5.Resaltar una columna de comerciales concreta
- * 6.Que al seleccionar un comercial se modifique la gráfica y se muestren sus datos en la gráfica.
+ * 
  */
 public class MainFrame extends JFrame{
 	private JPanel toolbar;
@@ -53,8 +50,7 @@ public class MainFrame extends JFrame{
 		
 		toolbar.add(titulo,BorderLayout.CENTER);
 
-		add(toolbar, BorderLayout.NORTH);
-		
+		add(toolbar, BorderLayout.NORTH);		
 	}
 	public void iniCuerpo() {           		
         //creo la gráfica con la clase externa

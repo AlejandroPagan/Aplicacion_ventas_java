@@ -26,7 +26,6 @@ public class RenderCeldasTabla extends JPanel implements TableCellRenderer {
         btnMenos.setPreferredSize(new Dimension(22, 22));
         btnMenos.setMargin(new Insets(0, 0, 0, 0));
 
-
         Color btnColor = new Color(255, 153, 0);
         btnMas.setBackground(btnColor);
         btnMenos.setBackground(btnColor);

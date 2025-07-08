@@ -5,6 +5,8 @@ import java.sql.SQLException;
 
 import org.jfree.data.category.DefaultCategoryDataset;
 import database.ConexionBD;
+//Método para crear la gráfica con todos los comerciales y con los comerciales concretos
+
 public class CreadorGrafica {
 	
 	public DefaultCategoryDataset datasetGrafica() {

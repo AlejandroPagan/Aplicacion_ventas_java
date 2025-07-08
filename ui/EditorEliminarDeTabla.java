@@ -48,29 +48,36 @@ public class EditorEliminarDeTabla extends AbstractCellEditor implements TableCe
 	        id_comercial = -1;
 	    }
 
-	    Object valorEspecial = table.getValueAt(row, table.getColumnCount() - 1);
-	    boolean esEspecial = valorEspecial != null && (valorEspecial.toString().equals("0"));
+	    // Limpia cualquier ActionListener anterior para evitar duplicaciones
+	    for (java.awt.event.ActionListener al : btnEliminar.getActionListeners()) {
+	        btnEliminar.removeActionListener(al);
+	    }
 
-	    if (esEspecial) {
-	        for (java.awt.event.ActionListener al : btnEliminar.getActionListeners()) {
-	            btnEliminar.removeActionListener(al);
+	    btnEliminar.addActionListener(e -> {
+	        int opcion = JOptionPane.showConfirmDialog(
+	            table,
+	            "¿Estás seguro de que quieres eliminar este comercial?\nSus ventas serán transferidas a 'AUSENTES'.",
+	            "Confirmar eliminación",
+	            JOptionPane.YES_NO_OPTION,
+	            JOptionPane.WARNING_MESSAGE
+	        );
+
+	        if (opcion == JOptionPane.YES_OPTION) {
+	            eliminarComercialYTransferirVentas();
 	        }
 
-	        btnEliminar.addActionListener(e -> {
-	            eliminarComercialYTransferirVentas();
-	            fireEditingStopped();
-	        });
+	        fireEditingStopped(); // Cierra el editor después de pulsar
+	    });
 
-	        JPanel panelCentrado = new JPanel(new FlowLayout(FlowLayout.CENTER));
-	        panelCentrado.setOpaque(true);
-	        panelCentrado.setBackground(new Color(30, 30, 30)); // o el color que quieras
-	        panelCentrado.add(btnEliminar);
+	    // Devuelve el botón dentro de un panel centrado
+	    JPanel panelCentrado = new JPanel(new FlowLayout(FlowLayout.CENTER));
+	    panelCentrado.setOpaque(true);
+	    panelCentrado.setBackground(new Color(30, 30, 30));
+	    panelCentrado.add(btnEliminar);
 
-	        return panelCentrado;
-	    } else {
-	        return new JLabel(""); // celda vacía
-	    }
+	    return panelCentrado;
 	}
+
 
 
 	 @Override

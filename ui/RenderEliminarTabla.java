@@ -11,9 +11,9 @@ public class RenderEliminarTabla extends JPanel implements TableCellRenderer {
         setLayout(new BoxLayout(this, BoxLayout.X_AXIS));
         setOpaque(true);
 
-        btnEliminar = new RoundedButton("Eliminar", 10);
-        btnEliminar.setPreferredSize(new Dimension(80, 25));
-        btnEliminar.setMargin(new Insets(0, 0, 0, 0));
+        btnEliminar = new RoundedButton("X", 10);
+        btnEliminar.setPreferredSize(new Dimension(25, 25));
+        btnEliminar.setMargin(new Insets(2, 2, 2, 2));
         btnEliminar.setBackground(Color.RED);
         btnEliminar.setForeground(Color.WHITE);
         btnEliminar.setFocusPainted(false);
@@ -25,19 +25,13 @@ public class RenderEliminarTabla extends JPanel implements TableCellRenderer {
         removeAll();
 
         Object valorEspecial = table.getValueAt(row, column);
-        boolean mostrarBoton = valorEspecial != null && valorEspecial.toString().equals("0");
-
-        if (mostrarBoton) {
+       
             JPanel panelCentrado = new JPanel(new FlowLayout(FlowLayout.CENTER));
             panelCentrado.setOpaque(true);
             panelCentrado.setBackground(table.getBackground());
             panelCentrado.add(btnEliminar);
             return panelCentrado;
-        } else {
-            add(Box.createHorizontalGlue());
-            setBackground(table.getBackground());
-            return this;
-        }
+        
     }
 
 
